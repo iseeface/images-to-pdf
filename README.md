@@ -39,7 +39,7 @@ To create an executable version of this application:
 3. The `.exe` file will be available in the `dist/` directory.
 
 ## Download Executable Version
-If you prefer to use the application without installing Python, you can download the precompiled `.exe` file from the [Releases](https://github.com/images-to-pdf/releases) section.
+If you prefer to use the application without installing Python, you can download the precompiled `.exe` file from the [Releases](https://github.com/iseeface/images-to-pdf/releases) section.
 
 ## Usage
 1. Open the application.
