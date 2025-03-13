@@ -9,7 +9,6 @@ Image to PDF Converter is a simple and user-friendly desktop application that al
 - Remove selected images before conversion
 - Choose between Portrait and Landscape orientation
 - Progress bar to show conversion status
-- Credit displayed in the UI
 
 ## Installation
 ### Prerequisites
