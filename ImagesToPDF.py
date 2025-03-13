@@ -3,6 +3,7 @@ from PIL import Image
 from tkinter import Tk, filedialog, messagebox, Button, Label, OptionMenu, StringVar, Listbox, Frame, ttk
 from tkinterdnd2 import TkinterDnD, DND_FILES
 import tkinter as tk
+import threading
 
 class ImageToPDFConverter:
     def __init__(self, root):
@@ -23,11 +24,16 @@ class ImageToPDFConverter:
         self.listbox = Listbox(root, selectmode="extended")
         self.listbox.pack(pady=10, padx=10, fill="both", expand=True)
 
-        # Button to add images
+        # Buttons to modify image list
         self.add_images_button = Button(root, text="Add Images", command=self.add_images)
         self.add_images_button.pack(pady=5)
-
-        # Button to remove selected images
+        
+        self.move_up_button = Button(root, text="Move Up", command=self.move_up)
+        self.move_up_button.pack(pady=5)
+        
+        self.move_down_button = Button(root, text="Move Down", command=self.move_down)
+        self.move_down_button.pack(pady=5)
+        
         self.remove_images_button = Button(root, text="Remove Selected Images", command=self.remove_images)
         self.remove_images_button.pack(pady=5)
 
@@ -41,9 +47,16 @@ class ImageToPDFConverter:
         self.orientation_var = StringVar(value="Portrait")
         self.orientation_menu = OptionMenu(self.settings_frame, self.orientation_var, "Portrait", "Landscape")
         self.orientation_menu.grid(row=0, column=1, padx=5)
+        
+        # Quality selection
+        self.quality_label = Label(self.settings_frame, text="Quality:")
+        self.quality_label.grid(row=1, column=0, padx=5)
+        self.quality_var = StringVar(value="High")
+        self.quality_menu = OptionMenu(self.settings_frame, self.quality_var, "High", "Medium", "Low")
+        self.quality_menu.grid(row=1, column=1, padx=5)
 
         # Button to convert images to PDF
-        self.convert_button = Button(root, text="Convert to PDF", command=self.convert_to_pdf)
+        self.convert_button = Button(root, text="Convert to PDF", command=self.start_conversion)
         self.convert_button.pack(pady=20)
 
         # Progress bar
@@ -70,24 +83,36 @@ class ImageToPDFConverter:
     def add_images(self):
         files = filedialog.askopenfilenames(
             title="Select Images",
-            filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp")]
+            filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.webp;*.ico")]
         )
         if files:
             self.image_files.extend(files)
             self.update_listbox()
             self.adjust_window_size()
+    
+    def move_up(self):
+        selected = self.listbox.curselection()
+        for i in selected:
+            if i > 0:
+                self.image_files[i], self.image_files[i-1] = self.image_files[i-1], self.image_files[i]
+        self.update_listbox()
+    
+    def move_down(self):
+        selected = self.listbox.curselection()
+        for i in reversed(selected):
+            if i < len(self.image_files) - 1:
+                self.image_files[i], self.image_files[i+1] = self.image_files[i+1], self.image_files[i]
+        self.update_listbox()
 
     def remove_images(self):
         selected_indices = self.listbox.curselection()
         selected_files = [self.listbox.get(i) for i in selected_indices]
-        
-        # Remove from list
         self.image_files = [f for f in self.image_files if os.path.basename(f) not in selected_files]
         self.update_listbox()
         self.adjust_window_size()
 
     def drop_files(self, event):
-        files = self.root.tk.splitlist(event.data)  # Fix for drag and drop issue
+        files = self.root.tk.splitlist(event.data)
         self.image_files.extend(files)
         self.update_listbox()
         self.adjust_window_size()
@@ -96,6 +121,9 @@ class ImageToPDFConverter:
         self.listbox.delete(0, tk.END)
         for file in self.image_files:
             self.listbox.insert(tk.END, os.path.basename(file))
+    
+    def start_conversion(self):
+        threading.Thread(target=self.convert_to_pdf, daemon=True).start()
 
     def convert_to_pdf(self):
         if not self.image_files:
@@ -110,28 +138,19 @@ class ImageToPDFConverter:
         if not output_pdf:
             return
 
-        orientation = self.orientation_var.get()
+        quality = {"High": 100, "Medium": 75, "Low": 50}[self.quality_var.get()]
         images = [Image.open(image) for image in self.image_files]
-        total_images = len(images)
-
-        self.progress["maximum"] = total_images
+        self.progress["maximum"] = len(images)
         self.progress["value"] = 0
-        self.root.update_idletasks()
-
-        # Rotate images if orientation is landscape
-        if orientation == "Landscape":
-            images = [image.rotate(90, expand=True) for image in images]
-
-        # Save images to PDF with progress bar
+        
         for i, img in enumerate(images):
             if i == 0:
-                img.save(output_pdf, save_all=True, append_images=images[1:], resolution=100.0)
-            
+                img.save(output_pdf, save_all=True, append_images=images[1:], quality=quality, resolution=100.0)
             self.progress["value"] = i + 1
             self.root.update_idletasks()
 
         messagebox.showinfo("Success", f"PDF saved as {output_pdf}")
-        self.progress["value"] = 0  # Reset progress after completion
+        self.progress["value"] = 0
 
 if __name__ == "__main__":
     root = TkinterDnD.Tk()

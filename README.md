@@ -5,10 +5,13 @@ Image to PDF Converter is a simple and user-friendly desktop application that al
 
 ## Features
 - Drag and drop images to add them to the list
-- Supports multiple image formats (PNG, JPG, JPEG, GIF, BMP)
+- Supports multiple image formats (PNG, JPG, JPEG, GIF, BMP, WebP, ICO)
 - Remove selected images before conversion
+- Move images up or down to reorder before conversion
 - Choose between Portrait and Landscape orientation
+- Select PDF quality (High, Medium, Low) to control file size
 - Progress bar to show conversion status
+- Multi-threaded conversion for a responsive UI
 
 ## Installation
 ### Prerequisites
@@ -44,10 +47,11 @@ If you prefer to use the application without installing Python, you can download
 1. Open the application.
 2. Drag and drop images or use the **Add Images** button.
 3. (Optional) Remove unwanted images using the **Remove Selected Images** button.
-4. Choose the orientation (Portrait or Landscape).
-5. Click **Convert to PDF** and select the output file location.
-6. The progress bar will update as the conversion happens.
+4. (Optional) Reorder images using the **Move Up** and **Move Down** buttons.
+5. Choose the orientation (Portrait or Landscape).
+6. Select the desired PDF quality (High, Medium, Low).
+7. Click **Convert to PDF** and select the output file location.
+8. The progress bar will update as the conversion happens.
 
 ## License
 This project is open-source and available under the MIT License.
-
